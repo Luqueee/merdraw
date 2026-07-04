@@ -54,6 +54,7 @@ type Store = {
   select: (nodeId: string | null, edgeId: string | null) => void;
   toDocument: () => ProjectDoc;
   loadDocument: (doc: ProjectDoc) => void;
+  loadSample: () => void;
 };
 
 export const useStore = create<Store>((set, get) => ({
@@ -114,4 +115,40 @@ export const useStore = create<Store>((set, get) => ({
       selectedNodeId: null,
       selectedEdgeId: null,
     }),
+  loadSample: () => {
+    const node = (
+      id: string,
+      shape: ShapeKind,
+      label: string,
+      x: number,
+      y: number,
+    ): FlowNode => ({ id, type: 'shape', position: { x, y }, data: { label, shape } });
+    const edge = (
+      id: string,
+      source: string,
+      target: string,
+      data: FlowEdgeData,
+    ): FlowEdge => ({ id, source, target, data, ...edgeVisuals(data) });
+    set({
+      direction: 'TD',
+      selectedNodeId: null,
+      selectedEdgeId: null,
+      nodes: [
+        node('s1', 'stadium', 'Inicio', 320, 20),
+        node('s2', 'rectangle', 'Procesar datos', 300, 140),
+        node('s3', 'decision', '¿Es válido?', 320, 260),
+        node('s4', 'rectangle', 'Guardar', 150, 420),
+        node('s5', 'rectangle', 'Mostrar error', 470, 420),
+        node('s6', 'stadium', 'Fin', 150, 540),
+      ],
+      edges: [
+        edge('e1', 's1', 's2', { label: '', lineStyle: 'solid', arrow: true }),
+        edge('e2', 's2', 's3', { label: '', lineStyle: 'solid', arrow: true }),
+        edge('e3', 's3', 's4', { label: 'Sí', lineStyle: 'solid', arrow: true }),
+        edge('e4', 's3', 's5', { label: 'No', lineStyle: 'dotted', arrow: true }),
+        edge('e5', 's4', 's6', { label: '', lineStyle: 'solid', arrow: true }),
+        edge('e6', 's5', 's2', { label: 'reintentar', lineStyle: 'thick', arrow: true }),
+      ],
+    });
+  },
 }));

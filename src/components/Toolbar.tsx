@@ -23,6 +23,7 @@ export function Toolbar() {
   const addNode = useStore((s) => s.addNode);
   const direction = useStore((s) => s.direction);
   const setDirection = useStore((s) => s.setDirection);
+  const loadSample = useStore((s) => s.loadSample);
 
   return (
     <header className="toolbar">
@@ -51,6 +52,12 @@ export function Toolbar() {
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="toolbar__group">
+        <button className="btn" onClick={loadSample}>
+          Ejemplo
+        </button>
       </div>
 
       <div className="toolbar__group toolbar__group--right">
