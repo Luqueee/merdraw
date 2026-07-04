@@ -1,0 +1,310 @@
+@import "tailwindcss";
+
+/* ---- Root / reset ---------------------------------------------------- */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  color: #1f2937;
+  background: #f8fafc;
+}
+
+/* ---- App layout ------------------------------------------------------ */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app__body {
+  display: flex;
+  flex: 1;
+  min-height: 0; /* allow children to shrink & scroll */
+}
+
+.canvas {
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+}
+
+.sidebar {
+  width: 380px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-left: 1px solid #e2e8f0;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Node shapes (cosmetic on canvas; Mermaid does the real render) -- */
+.shape {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #334155;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 13px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.shape__label {
+  pointer-events: none;
+  white-space: pre-wrap;
+  line-height: 1.2;
+}
+
+.shape--rounded {
+  border-radius: 14px;
+}
+
+.shape--stadium {
+  border-radius: 999px;
+}
+
+.shape--circle {
+  border-radius: 50%;
+  aspect-ratio: 1;
+  min-width: 72px;
+  padding: 10px;
+}
+
+.shape--subroutine {
+  box-shadow:
+    inset 0 0 0 3px #ffffff,
+    inset 0 0 0 4px #334155;
+}
+
+.shape--decision {
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  padding: 24px 28px;
+  border: none;
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.shape--selected {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* ---- Toolbar --------------------------------------------------------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar__group--right {
+  margin-left: auto;
+}
+
+.toolbar__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ---- Buttons & form controls ---------------------------------------- */
+.btn {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #1f2937;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+
+.btn:hover {
+  background: #eef2f7;
+  border-color: #94a3b8;
+}
+
+.btn:active {
+  background: #e2e8f0;
+}
+
+.btn--primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.btn--primary:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.btn--sm {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.select,
+.input {
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ---- Inspector ------------------------------------------------------- */
+.inspector {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inspector__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475569;
+}
+
+.inspector__empty {
+  margin: 0;
+  font-size: 13px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field--row {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.field__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* ---- Mermaid panel --------------------------------------------------- */
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.panel__section {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.panel__title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475569;
+}
+
+.panel__header .panel__title {
+  margin: 0;
+}
+
+.panel__empty {
+  margin: 0;
+  font-size: 13px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.panel__preview {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: auto;
+}
+
+.panel__preview svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.panel__error {
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #b91c1c;
+  font-size: 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  white-space: pre-wrap;
+}
+
+.panel__code {
+  margin: 0;
+  padding: 12px;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  overflow-x: auto;
+  white-space: pre;
+}
