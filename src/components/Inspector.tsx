@@ -27,6 +27,26 @@ export function Inspector() {
   const node = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
   const edge = selectedEdgeId ? edges.find((e) => e.id === selectedEdgeId) : undefined;
 
+  if (node && node.type === 'icon') {
+    return (
+      <section className="inspector">
+        <h2 className="inspector__title">Icono</h2>
+        <div className="inspector__icon">
+          <img src={node.data.src} alt={node.data.title} />
+          <span>{node.data.title}</span>
+        </div>
+        <label className="field">
+          <span className="field__label">Etiqueta</span>
+          <input
+            className="input"
+            value={node.data.label}
+            onChange={(e) => updateNode(node.id, { label: e.target.value })}
+          />
+        </label>
+      </section>
+    );
+  }
+
   if (node) {
     return (
       <section className="inspector">

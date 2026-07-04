@@ -225,3 +225,115 @@ describe('generateMermaid — integration (ordering + mixed shapes/styles)', () 
     );
   });
 });
+
+describe('generateMermaid — icon nodes', () => {
+  const SRC = 'data:image/svg+xml;base64,QUJD';
+
+  // Icon nodes are the discriminated-union 'icon' variant (src/flow/types.ts).
+  // `title` is required by IconNodeData but the generator never emits it — the
+  // exact-string assertions below prove it stays out of the output.
+  const iconNode = (
+    id: string,
+    title: string,
+    label: string,
+    src: string,
+  ): FlowNode => ({
+    id,
+    position: { x: 0, y: 0 },
+    type: 'icon',
+    data: { label, title, src },
+  });
+
+  const oneIcon = (label: string, src = SRC) =>
+    generateMermaid([iconNode('a', 'Title', label, src)], [], 'TD');
+
+  it('single icon WITH label emits img + label + fixed w/h/constraint geometry', () => {
+    expect(oneIcon('Vercel')).toBe(
+      'flowchart TD\n    n1@{ img: "data:image/svg+xml;base64,QUJD", label: "Vercel", w: 60, h: 60, constraint: "on" }',
+    );
+  });
+
+  it('empty label omits the label part entirely', () => {
+    expect(oneIcon('')).toBe(
+      'flowchart TD\n    n1@{ img: "data:image/svg+xml;base64,QUJD", w: 60, h: 60, constraint: "on" }',
+    );
+  });
+
+  it('all-whitespace label omits the label part (trim-then-check)', () => {
+    expect(oneIcon('   ')).toBe(
+      'flowchart TD\n    n1@{ img: "data:image/svg+xml;base64,QUJD", w: 60, h: 60, constraint: "on" }',
+    );
+  });
+
+  it('label: double quote -> #quot;', () => {
+    expect(oneIcon('a"b')).toBe(
+      'flowchart TD\n    n1@{ img: "data:image/svg+xml;base64,QUJD", label: "a#quot;b", w: 60, h: 60, constraint: "on" }',
+    );
+  });
+
+  it('label: newline -> <br/>', () => {
+    expect(oneIcon('a\nb')).toBe(
+      'flowchart TD\n    n1@{ img: "data:image/svg+xml;base64,QUJD", label: "a<br/>b", w: 60, h: 60, constraint: "on" }',
+    );
+  });
+
+  // Asymmetry vs shape nodes: shape labels keep surrounding whitespace, icon
+  // labels are trimmed before escaping (esc(label.trim())).
+  it('label is trimmed before escaping (surrounding whitespace dropped)', () => {
+    expect(oneIcon('  Vercel  ')).toBe(
+      'flowchart TD\n    n1@{ img: "data:image/svg+xml;base64,QUJD", label: "Vercel", w: 60, h: 60, constraint: "on" }',
+    );
+  });
+
+  it('src is inserted verbatim, NOT run through esc', () => {
+    // A quote in src would become #quot; if it were (wrongly) escaped like a label.
+    const rawSrc = 'data:image/svg+xml;utf8,<svg id="x"/>';
+    expect(oneIcon('Icon', rawSrc)).toBe(
+      `flowchart TD\n    n1@{ img: "${rawSrc}", label: "Icon", w: 60, h: 60, constraint: "on" }`,
+    );
+  });
+
+  it('mixed graph (shape then icon): synthetic ids follow array order', () => {
+    const nodes = [
+      node('box', 'rectangle', 'Box'),
+      iconNode('logo', 'Vercel', 'Icon', SRC),
+    ];
+    expect(generateMermaid(nodes, [], 'TD')).toBe(
+      [
+        'flowchart TD',
+        '    n1["Box"]',
+        '    n2@{ img: "data:image/svg+xml;base64,QUJD", label: "Icon", w: 60, h: 60, constraint: "on" }',
+      ].join('\n'),
+    );
+  });
+
+  it('mixed graph (icon then shape): reversed order maps n1->icon, n2->shape', () => {
+    const nodes = [
+      iconNode('logo', 'Vercel', 'Icon', SRC),
+      node('box', 'rectangle', 'Box'),
+    ];
+    expect(generateMermaid(nodes, [], 'LR')).toBe(
+      [
+        'flowchart LR',
+        '    n1@{ img: "data:image/svg+xml;base64,QUJD", label: "Icon", w: 60, h: 60, constraint: "on" }',
+        '    n2["Box"]',
+      ].join('\n'),
+    );
+  });
+
+  it('edge between a shape and an icon node uses synthetic ids after all node lines', () => {
+    const nodes = [
+      node('box', 'rectangle', 'Box'),
+      iconNode('logo', 'Vercel', 'Icon', SRC),
+    ];
+    const edges = [edge('e', 'box', 'logo', 'solid', true, '')];
+    expect(generateMermaid(nodes, edges, 'TD')).toBe(
+      [
+        'flowchart TD',
+        '    n1["Box"]',
+        '    n2@{ img: "data:image/svg+xml;base64,QUJD", label: "Icon", w: 60, h: 60, constraint: "on" }',
+        '    n1 --> n2',
+      ].join('\n'),
+    );
+  });
+});

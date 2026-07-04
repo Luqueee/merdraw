@@ -3,6 +3,7 @@ import { FlowCanvas } from './flow/FlowCanvas';
 import { Toolbar } from './components/Toolbar';
 import { Inspector } from './components/Inspector';
 import { MermaidPanel } from './components/MermaidPanel';
+import { IconPicker } from './components/IconPicker';
 import '@xyflow/react/dist/style.css';
 import './index.css';
 
@@ -21,6 +22,7 @@ export default function App() {
           <MermaidPanel />
         </aside>
       </div>
+      <IconPicker />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import type { FlowNode } from './types';
+import type { ShapeFlowNode } from './types';
 
-export function ShapeNode({ data, selected }: NodeProps<FlowNode>) {
+export function ShapeNode({ data, selected }: NodeProps<ShapeFlowNode>) {
   return (
     <div className={`shape shape--${data.shape}${selected ? ' shape--selected' : ''}`}>
       <Handle type="target" position={Position.Top} />

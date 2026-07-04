@@ -13,7 +13,7 @@ import {
 import type {
   FlowNode,
   FlowEdge,
-  FlowNodeData,
+  ShapeNodeData,
   FlowEdgeData,
   Direction,
   ShapeKind,
@@ -48,13 +48,16 @@ type Store = {
   onConnect: OnConnect;
   onReconnect: OnReconnect<FlowEdge>;
   addNode: (shape?: ShapeKind) => void;
-  updateNode: (id: string, patch: Partial<FlowNodeData>) => void;
+  addIcon: (icon: { title: string; src: string }) => void;
+  updateNode: (id: string, patch: Partial<ShapeNodeData>) => void;
   updateEdge: (id: string, patch: Partial<FlowEdgeData>) => void;
   setDirection: (d: Direction) => void;
   select: (nodeId: string | null, edgeId: string | null) => void;
   toDocument: () => ProjectDoc;
   loadDocument: (doc: ProjectDoc) => void;
   loadSample: () => void;
+  iconPickerOpen: boolean;
+  setIconPickerOpen: (open: boolean) => void;
 };
 
 export const useStore = create<Store>((set, get) => ({
@@ -63,6 +66,7 @@ export const useStore = create<Store>((set, get) => ({
   direction: 'TD',
   selectedNodeId: null,
   selectedEdgeId: null,
+  iconPickerOpen: false,
   onNodesChange: (c) => set({ nodes: applyNodeChanges(c, get().nodes) }),
   onEdgesChange: (c) => set({ edges: applyEdgeChanges(c, get().edges) }),
   onConnect: (conn) => {
@@ -85,10 +89,22 @@ export const useStore = create<Store>((set, get) => ({
         },
       ],
     }),
+  addIcon: (icon) =>
+    set({
+      nodes: [
+        ...get().nodes,
+        {
+          id: nextId(),
+          type: 'icon',
+          position: { x: 120 + Math.random() * 240, y: 80 + Math.random() * 240 },
+          data: { label: icon.title, title: icon.title, src: icon.src },
+        },
+      ],
+    }),
   updateNode: (id, patch) =>
     set({
       nodes: get().nodes.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, ...patch } } : n,
+        n.id === id ? ({ ...n, data: { ...n.data, ...patch } } as FlowNode) : n,
       ),
     }),
   updateEdge: (id, patch) =>
@@ -101,6 +117,7 @@ export const useStore = create<Store>((set, get) => ({
     }),
   setDirection: (direction) => set({ direction }),
   select: (selectedNodeId, selectedEdgeId) => set({ selectedNodeId, selectedEdgeId }),
+  setIconPickerOpen: (iconPickerOpen) => set({ iconPickerOpen }),
   toDocument: () => ({
     version: 1,
     direction: get().direction,

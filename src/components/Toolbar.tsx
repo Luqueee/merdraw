@@ -24,6 +24,7 @@ export function Toolbar() {
   const direction = useStore((s) => s.direction);
   const setDirection = useStore((s) => s.setDirection);
   const loadSample = useStore((s) => s.loadSample);
+  const setIconPickerOpen = useStore((s) => s.setIconPickerOpen);
 
   return (
     <header className="toolbar">
@@ -34,6 +35,9 @@ export function Toolbar() {
             {label}
           </button>
         ))}
+        <button className="btn" onClick={() => setIconPickerOpen(true)}>
+          Icono
+        </button>
       </div>
 
       <div className="toolbar__group">

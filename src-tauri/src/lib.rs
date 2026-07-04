@@ -16,6 +16,20 @@ fn write_binary_file(path: String, contents: Vec<u8>) -> Result<(), String> {
     std::fs::write(&path, contents).map_err(|e| e.to_string())
 }
 
+// Fetch a remote text resource server-side (no browser CORS). Restricted to the
+// svgl.app domain so this never becomes an open proxy. Used to inline SVG icons.
+#[tauri::command]
+fn fetch_url(url: String) -> Result<String, String> {
+    if !url.starts_with("https://svgl.app/") && !url.starts_with("https://api.svgl.app/") {
+        return Err("url not allowed".into());
+    }
+    ureq::get(&url)
+        .call()
+        .map_err(|e| e.to_string())?
+        .into_string()
+        .map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -24,7 +38,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             read_text_file,
             write_text_file,
-            write_binary_file
+            write_binary_file,
+            fetch_url
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

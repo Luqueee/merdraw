@@ -308,3 +308,149 @@ body {
   overflow-x: auto;
   white-space: pre;
 }
+
+/* ---- Icon nodes ------------------------------------------------------ */
+.icon-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.icon-node__img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.icon-node__label {
+  font-size: 12px;
+  color: #0f172a;
+  text-align: center;
+  pointer-events: none;
+}
+
+.icon-node--selected {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.inspector__icon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.inspector__icon img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.inspector__icon span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* ---- Icon picker (svgl) modal --------------------------------------- */
+.picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  width: min(760px, 100%);
+  max-height: 80vh;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.picker__head {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.picker__search {
+  flex: 1;
+}
+
+.picker__error {
+  margin: 12px 14px 0;
+  padding: 8px 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.picker__msg {
+  padding: 32px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.picker__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  padding: 14px;
+  overflow-y: auto;
+}
+
+.picker__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.picker__item:hover {
+  border-color: #2563eb;
+  background: #eef2ff;
+}
+
+.picker__item:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.picker__icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.picker__name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  color: #475569;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

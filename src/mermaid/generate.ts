@@ -36,8 +36,15 @@ export function generateMermaid(
   nodes.forEach((n, i) => id.set(n.id, `n${i + 1}`));
   const lines: string[] = [`flowchart ${direction}`];
   for (const n of nodes) {
-    const [o, c] = DELIMS[n.data.shape];
-    lines.push(`    ${id.get(n.id)}${o}"${esc(n.data.label)}"${c}`);
+    const nid = id.get(n.id);
+    if (n.type === 'icon') {
+      const lbl = n.data.label?.trim();
+      const label = lbl ? `, label: "${esc(lbl)}"` : '';
+      lines.push(`    ${nid}@{ img: "${n.data.src}"${label}, w: 60, h: 60, constraint: "on" }`);
+    } else {
+      const [o, c] = DELIMS[n.data.shape];
+      lines.push(`    ${nid}${o}"${esc(n.data.label)}"${c}`);
+    }
   }
   for (const e of edges) {
     const s = id.get(e.source);
