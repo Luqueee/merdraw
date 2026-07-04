@@ -26,10 +26,18 @@ export async function fetchIcons(query: string, limit = 30): Promise<SvglEntry[]
   return Array.isArray(data) ? (data as SvglEntry[]) : [];
 }
 
-/** Fetch the SVG (light variant for themed logos) through Rust and inline it as a base64 data URI. */
+/**
+ * Fetch the SVG (light variant for themed logos) and inline it as a base64 data URI.
+ * In the Tauri app this goes through the Rust `fetch_url` command (svgl SVG files send
+ * no CORS headers, so the webview cannot fetch them directly). Under `bun run dev`
+ * there is no Tauri runtime, so it falls back to the Vite `/svgl` dev proxy.
+ */
 export async function fetchSvgDataUri(route: SvglRoute): Promise<string> {
   const url = typeof route === 'string' ? route : route.light;
-  const svg = await invoke<string>('fetch_url', { url });
+  const inTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+  const svg = inTauri
+    ? await invoke<string>('fetch_url', { url })
+    : await (await fetch(url.replace('https://svgl.app', '/svgl'))).text();
   const bytes = new TextEncoder().encode(svg);
   let binary = '';
   for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);

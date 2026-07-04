@@ -29,5 +29,15 @@ export default defineConfig(async () => ({
       // 3. tell Vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
     },
+    // Dev-only: the browser can't fetch svgl SVG files cross-origin (they send no
+    // CORS headers). In the Tauri app the Rust `fetch_url` command handles this;
+    // under `bun run dev` we proxy /svgl -> svgl.app so it is same-origin.
+    proxy: {
+      "/svgl": {
+        target: "https://svgl.app",
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/svgl/, ""),
+      },
+    },
   },
 }));
