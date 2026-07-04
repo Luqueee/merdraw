@@ -1,6 +1,15 @@
 import mermaid from 'mermaid';
 
-mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: 'default' });
+// htmlLabels:false makes Mermaid render labels as SVG <text> instead of
+// <foreignObject> (HTML). foreignObject taints the canvas in svgToPng, so
+// toBlob() throws SecurityError on PNG export. SVG <text> rasterizes cleanly.
+mermaid.initialize({
+  startOnLoad: false,
+  securityLevel: 'strict',
+  theme: 'default',
+  htmlLabels: false,
+  flowchart: { htmlLabels: false },
+});
 
 let n = 0;
 
