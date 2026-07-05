@@ -384,9 +384,41 @@ body {
 
 .picker__head {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
   padding: 14px;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.picker__tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.picker__tab {
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+}
+
+.picker__tab:hover {
+  background: #eef2f7;
+}
+
+.picker__tab--active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.picker__searchrow {
+  display: flex;
+  gap: 8px;
 }
 
 .picker__search {

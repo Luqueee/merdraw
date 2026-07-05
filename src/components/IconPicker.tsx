@@ -1,17 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../flow/store';
-import { fetchIcons, fetchSvgDataUri, type SvglEntry } from '../io/svgl';
+import { ICON_SOURCES, type IconResult } from '../io/icons';
 
 export function IconPicker() {
   const open = useStore((s) => s.iconPickerOpen);
   const setOpen = useStore((s) => s.setIconPickerOpen);
   const addIcon = useStore((s) => s.addIcon);
 
+  const [sourceId, setSourceId] = useState(ICON_SOURCES[0].id);
   const [query, setQuery] = useState('');
-  const [entries, setEntries] = useState<SvglEntry[]>([]);
+  const [results, setResults] = useState<IconResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [adding, setAdding] = useState<number | null>(null);
+  const [adding, setAdding] = useState<string | null>(null);
+
+  const source = ICON_SOURCES.find((s) => s.id === sourceId) ?? ICON_SOURCES[0];
 
   useEffect(() => {
     if (!open) return;
@@ -20,17 +23,18 @@ export function IconPicker() {
     setError(null);
     const timer = setTimeout(
       () => {
-        fetchIcons(query)
+        source
+          .search(query)
           .then((list) => {
             if (!cancelled) {
-              setEntries(list);
+              setResults(list);
               setLoading(false);
             }
           })
           .catch((e: unknown) => {
             if (!cancelled) {
               setError(e instanceof Error ? e.message : String(e));
-              setEntries([]);
+              setResults([]);
               setLoading(false);
             }
           });
@@ -41,16 +45,16 @@ export function IconPicker() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [open, query]);
+  }, [open, query, sourceId, source]);
 
   if (!open) return null;
 
-  const choose = async (entry: SvglEntry) => {
-    setAdding(entry.id);
+  const choose = async (icon: IconResult) => {
+    setAdding(icon.id);
     setError(null);
     try {
-      const src = await fetchSvgDataUri(entry.route);
-      addIcon({ title: entry.title, src });
+      const src = await source.toDataUri(icon);
+      addIcon({ title: icon.title, src });
       setQuery('');
       setOpen(false);
     } catch (e) {
@@ -64,47 +68,56 @@ export function IconPicker() {
     <div className="picker-overlay" onClick={() => setOpen(false)}>
       <div className="picker" onClick={(e) => e.stopPropagation()}>
         <div className="picker__head">
-          <input
-            className="input picker__search"
-            placeholder="Buscar iconos en svgl.app…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            autoFocus
-          />
-          <button className="btn" onClick={() => setOpen(false)}>
-            Cerrar
-          </button>
+          <div className="picker__tabs">
+            {ICON_SOURCES.map((s) => (
+              <button
+                key={s.id}
+                className={`picker__tab${s.id === sourceId ? ' picker__tab--active' : ''}`}
+                onClick={() => setSourceId(s.id)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <div className="picker__searchrow">
+            <input
+              className="input picker__search"
+              placeholder={`Buscar en ${source.label}…`}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+            />
+            <button className="btn" onClick={() => setOpen(false)}>
+              Cerrar
+            </button>
+          </div>
         </div>
 
         {error && <div className="picker__error">{error}</div>}
 
         {loading ? (
           <p className="picker__msg">Cargando…</p>
-        ) : entries.length === 0 ? (
-          <p className="picker__msg">Sin resultados.</p>
+        ) : results.length === 0 ? (
+          <p className="picker__msg">{query ? 'Sin resultados.' : 'Escribe para buscar.'}</p>
         ) : (
           <div className="picker__grid">
-            {entries.map((entry) => {
-              const preview =
-                typeof entry.route === 'string' ? entry.route : entry.route.light;
-              return (
-                <button
-                  key={entry.id}
-                  className="picker__item"
-                  title={entry.title}
-                  disabled={adding !== null}
-                  onClick={() => choose(entry)}
-                >
-                  <img
-                    className="picker__icon"
-                    src={preview}
-                    alt={entry.title}
-                    loading="lazy"
-                  />
-                  <span className="picker__name">{entry.title}</span>
-                </button>
-              );
-            })}
+            {results.map((icon) => (
+              <button
+                key={icon.id}
+                className="picker__item"
+                title={icon.title}
+                disabled={adding !== null}
+                onClick={() => choose(icon)}
+              >
+                <img
+                  className="picker__icon"
+                  src={icon.previewUrl}
+                  alt={icon.title}
+                  loading="lazy"
+                />
+                <span className="picker__name">{icon.title}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
