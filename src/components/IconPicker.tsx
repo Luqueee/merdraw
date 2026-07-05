@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../flow/store';
-import { ICON_SOURCES, type IconResult } from '../io/icons';
+import { ICON_SOURCES, iconToDataUri, type IconResult } from '../io/icons';
 
 export function IconPicker() {
   const open = useStore((s) => s.iconPickerOpen);
@@ -53,7 +53,7 @@ export function IconPicker() {
     setAdding(icon.id);
     setError(null);
     try {
-      const src = await source.toDataUri(icon);
+      const src = await iconToDataUri(source, icon);
       addIcon({ title: icon.title, src });
       setQuery('');
       setOpen(false);

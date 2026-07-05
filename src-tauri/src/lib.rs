@@ -16,12 +16,15 @@ fn write_binary_file(path: String, contents: Vec<u8>) -> Result<(), String> {
     std::fs::write(&path, contents).map_err(|e| e.to_string())
 }
 
-// Fetch a remote text resource server-side (no browser CORS). Restricted to the
-// svgl.app domain so this never becomes an open proxy. Used to inline SVG icons.
+// Fetch a remote text resource server-side (no browser CORS), used to inline SVG
+// icons from hosts whose files block cross-origin fetch. Restricted to an
+// allow-list so this never becomes an open proxy — add a host to enable a source.
+const ICON_HOSTS: [&str; 2] = ["https://svgl.app/", "https://api.svgl.app/"];
+
 #[tauri::command]
 fn fetch_url(url: String) -> Result<String, String> {
-    if !url.starts_with("https://svgl.app/") && !url.starts_with("https://api.svgl.app/") {
-        return Err("url not allowed".into());
+    if !ICON_HOSTS.iter().any(|h| url.starts_with(h)) {
+        return Err("url host not allow-listed".into());
     }
     ureq::get(&url)
         .call()

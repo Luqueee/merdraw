@@ -1,6 +1,10 @@
-// Icon sources for the picker. Each source knows how to search its catalog and
-// how to turn a chosen icon into a self-contained base64 data URI (so the diagram
-// stays offline-safe and PNG export never taints the canvas).
+// Icon sources for the picker.
+//
+// Adding a source is cheap: give it an `id`, `label`, and a `search()` that maps
+// its catalog to `IconResult[]`. The shared plumbing below handles transport,
+// error handling, and base64 inlining. A source only needs `corsBlocked: true`
+// when its SVG files lack CORS headers (then its host must be allow-listed in the
+// Rust `fetch_url` command and the Vite `/__svg` dev middleware).
 import { invoke } from '@tauri-apps/api/core';
 
 export type IconResult = {
@@ -13,11 +17,43 @@ export type IconResult = {
 export type IconSource = {
   id: string;
   label: string;
+  /** true when the source's SVG files send no CORS headers (fetched server-side). */
+  corsBlocked?: boolean;
   /** Empty query -> a starter set (may be []). */
   search: (query: string) => Promise<IconResult[]>;
-  /** Fetch the chosen icon's SVG and inline it as a base64 data URI. */
-  toDataUri: (icon: IconResult) => Promise<string>;
 };
+
+// --- shared plumbing, reused by every source ---------------------------------
+
+async function getJson(url: string): Promise<unknown> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`request failed (${res.status})`);
+  return res.json();
+}
+
+// Origins whose SVG files are CORS-blocked: proxied same-origin by Vite in dev
+// (see `server.proxy` in vite.config.ts), fetched by Rust `fetch_url` in Tauri.
+const DEV_PROXY: Record<string, string> = { 'https://svgl.app': '/svgl' };
+
+/** Fetch raw SVG text, routing CORS-blocked hosts server-side (Rust `fetch_url`
+ * in Tauri, the Vite dev proxy under `bun run dev`). */
+async function fetchSvg(url: string, corsBlocked = false): Promise<string> {
+  if (corsBlocked && '__TAURI_INTERNALS__' in window) {
+    return invoke<string>('fetch_url', { url });
+  }
+  let target = url;
+  if (corsBlocked) {
+    for (const [origin, prefix] of Object.entries(DEV_PROXY)) {
+      if (url.startsWith(origin)) {
+        target = prefix + url.slice(origin.length);
+        break;
+      }
+    }
+  }
+  const res = await fetch(target);
+  if (!res.ok) throw new Error(`request failed (${res.status})`);
+  return res.text();
+}
 
 function svgToDataUri(svg: string): string {
   const bytes = new TextEncoder().encode(svg);
@@ -26,9 +62,14 @@ function svgToDataUri(svg: string): string {
   return `data:image/svg+xml;base64,${btoa(binary)}`;
 }
 
+/** Resolve a chosen icon to a self-contained base64 data URI (offline-safe, and
+ * PNG export never taints the canvas with a cross-origin image). */
+export async function iconToDataUri(source: IconSource, icon: IconResult): Promise<string> {
+  return svgToDataUri(await fetchSvg(icon.svgUrl, source.corsBlocked));
+}
+
 // --- Iconify: 200k+ icons across 150+ open-source sets (MDI, Lucide, Tabler,
-// Simple Icons, Font Awesome, Heroicons, Phosphor, ...). api.iconify.design is
-// CORS-enabled, so the webview fetches it directly in both dev and Tauri. ---
+// Simple Icons, Font Awesome, Heroicons, Phosphor, ...). CORS-enabled. ---
 const ICONIFY_POPULAR = [
   'mdi:home', 'mdi:account', 'mdi:cog', 'mdi:magnify', 'mdi:heart', 'mdi:star',
   'mdi:bell', 'mdi:calendar', 'mdi:email', 'mdi:folder', 'mdi:file', 'mdi:cloud',
@@ -49,49 +90,31 @@ const iconify: IconSource = {
   async search(query) {
     const q = query.trim();
     if (!q) return ICONIFY_POPULAR.map(iconifyResult);
-    const res = await fetch(
+    const data = (await getJson(
       `https://api.iconify.design/search?query=${encodeURIComponent(q)}&limit=120`,
-    );
-    if (!res.ok) throw new Error(`Iconify API ${res.status}`);
-    const data = await res.json();
-    return Array.isArray(data?.icons) ? (data.icons as string[]).map(iconifyResult) : [];
-  },
-  async toDataUri(icon) {
-    const res = await fetch(icon.svgUrl);
-    if (!res.ok) throw new Error(`icon ${res.status}`);
-    return svgToDataUri(await res.text());
+    )) as { icons?: string[] };
+    return Array.isArray(data.icons) ? data.icons.map(iconifyResult) : [];
   },
 };
 
-// --- svgl.app: brand / product logos. The SVG files send no CORS headers, so
-// their content is fetched via the Rust `fetch_url` command (Tauri) or the Vite
-// `/svgl` dev proxy (browser). The catalog (api.svgl.app) does allow CORS. ---
+// --- svgl.app: brand / product logos. SVG files send no CORS headers. ---
 type SvglRoute = string | { light: string; dark: string };
 type SvglEntry = { id: number; title: string; route: SvglRoute };
 
 const svgl: IconSource = {
   id: 'svgl',
   label: 'Logos (svgl)',
+  corsBlocked: true,
   async search(query) {
     const q = query.trim();
-    const url = q
-      ? `https://api.svgl.app?search=${encodeURIComponent(q)}`
-      : 'https://api.svgl.app?limit=30';
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`svgl API ${res.status}`);
-    const data = await res.json();
+    const data = await getJson(
+      q ? `https://api.svgl.app?search=${encodeURIComponent(q)}` : 'https://api.svgl.app?limit=30',
+    );
     if (!Array.isArray(data)) return [];
     return (data as SvglEntry[]).map((e) => {
       const route = typeof e.route === 'string' ? e.route : e.route.light;
       return { id: `svgl:${e.id}`, title: e.title, previewUrl: route, svgUrl: route };
     });
-  },
-  async toDataUri(icon) {
-    const svgText =
-      '__TAURI_INTERNALS__' in window
-        ? await invoke<string>('fetch_url', { url: icon.svgUrl })
-        : await (await fetch(icon.svgUrl.replace('https://svgl.app', '/svgl'))).text();
-    return svgToDataUri(svgText);
   },
 };
 
