@@ -40,13 +40,51 @@ body {
 }
 
 .sidebar {
-  width: 380px;
-  flex-shrink: 0;
-  overflow-y: auto;
-  border-left: 1px solid #e2e8f0;
-  background: #ffffff;
   display: flex;
   flex-direction: column;
+  width: 380px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-left: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.sidebar__tabs {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.sidebar__tab {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+}
+
+.sidebar__tab:hover {
+  background: #eef2f7;
+}
+
+.sidebar__tab--active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.sidebar__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* ---- Node shapes (cosmetic on canvas; Mermaid does the real render) -- */
@@ -366,15 +404,13 @@ body {
   color: #334155;
 }
 
-/* ---- Icon picker — docked right sidebar (in-layout, no overlap) ------ */
+/* ---- Icon picker — fills the sidebar's "Iconos" tab ----------------- */
 .picker {
   display: flex;
   flex-direction: column;
-  width: 340px;
-  flex-shrink: 0;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
-  background: #ffffff;
-  border-left: 1px solid #e2e8f0;
 }
 
 .picker__head {
@@ -410,26 +446,6 @@ body {
   background: #2563eb;
   border-color: #2563eb;
   color: #ffffff;
-}
-
-.picker__close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  margin-left: auto;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: #64748b;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.picker__close:hover {
-  background: #f1f5f9;
-  color: #0f172a;
 }
 
 .picker__error {

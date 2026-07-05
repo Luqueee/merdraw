@@ -1,9 +1,7 @@
 import { ReactFlowProvider } from '@xyflow/react';
 import { FlowCanvas } from './flow/FlowCanvas';
 import { Toolbar } from './components/Toolbar';
-import { Inspector } from './components/Inspector';
-import { MermaidPanel } from './components/MermaidPanel';
-import { IconPicker } from './components/IconPicker';
+import { Sidebar } from './components/Sidebar';
 import '@xyflow/react/dist/style.css';
 import './index.css';
 
@@ -17,11 +15,7 @@ export default function App() {
             <FlowCanvas />
           </div>
         </ReactFlowProvider>
-        <aside className="sidebar">
-          <Inspector />
-          <MermaidPanel />
-        </aside>
-        <IconPicker />
+        <Sidebar />
       </div>
     </div>
   );

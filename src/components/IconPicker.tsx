@@ -3,9 +3,8 @@ import { useStore } from '../flow/store';
 import { ICON_SOURCES, iconToDataUri, type IconResult } from '../io/icons';
 
 export function IconPicker() {
-  const open = useStore((s) => s.iconPickerOpen);
-  const setOpen = useStore((s) => s.setIconPickerOpen);
   const addIcon = useStore((s) => s.addIcon);
+  const setSidebarTab = useStore((s) => s.setSidebarTab);
 
   const [sourceId, setSourceId] = useState(ICON_SOURCES[0].id);
   const [query, setQuery] = useState('');
@@ -17,7 +16,6 @@ export function IconPicker() {
   const source = ICON_SOURCES.find((s) => s.id === sourceId) ?? ICON_SOURCES[0];
 
   useEffect(() => {
-    if (!open) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -45,18 +43,15 @@ export function IconPicker() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [open, query, sourceId, source]);
+  }, [query, sourceId, source]);
 
   useEffect(() => {
-    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') setSidebarTab('diagram');
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, setOpen]);
-
-  if (!open) return null;
+  }, [setSidebarTab]);
 
   const choose = async (icon: IconResult) => {
     setAdding(icon.id);
@@ -64,8 +59,6 @@ export function IconPicker() {
     try {
       const src = await iconToDataUri(source, icon);
       addIcon({ title: icon.title, src });
-      setQuery('');
-      setOpen(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -74,7 +67,7 @@ export function IconPicker() {
   };
 
   return (
-    <aside className="picker">
+    <div className="picker">
       <div className="picker__head">
         <div className="picker__tabs">
           {ICON_SOURCES.map((s) => (
@@ -86,13 +79,6 @@ export function IconPicker() {
               {s.label}
             </button>
           ))}
-          <button
-            className="picker__close"
-            onClick={() => setOpen(false)}
-            aria-label="Cerrar"
-          >
-            ✕
-          </button>
         </div>
         <input
           className="input picker__search"
@@ -125,6 +111,6 @@ export function IconPicker() {
           ))}
         </div>
       )}
-    </aside>
+    </div>
   );
 }

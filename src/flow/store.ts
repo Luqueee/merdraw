@@ -20,6 +20,8 @@ import type {
   ProjectDoc,
 } from './types';
 
+export type SidebarTab = 'diagram' | 'icons';
+
 let seq = 0;
 const nextId = () => `node_${Date.now()}_${seq++}`;
 
@@ -56,8 +58,8 @@ type Store = {
   toDocument: () => ProjectDoc;
   loadDocument: (doc: ProjectDoc) => void;
   loadSample: () => void;
-  iconPickerOpen: boolean;
-  setIconPickerOpen: (open: boolean) => void;
+  sidebarTab: SidebarTab;
+  setSidebarTab: (tab: SidebarTab) => void;
 };
 
 export const useStore = create<Store>((set, get) => ({
@@ -66,7 +68,7 @@ export const useStore = create<Store>((set, get) => ({
   direction: 'TD',
   selectedNodeId: null,
   selectedEdgeId: null,
-  iconPickerOpen: false,
+  sidebarTab: 'diagram',
   onNodesChange: (c) => set({ nodes: applyNodeChanges(c, get().nodes) }),
   onEdgesChange: (c) => set({ edges: applyEdgeChanges(c, get().edges) }),
   onConnect: (conn) => {
@@ -117,7 +119,7 @@ export const useStore = create<Store>((set, get) => ({
     }),
   setDirection: (direction) => set({ direction }),
   select: (selectedNodeId, selectedEdgeId) => set({ selectedNodeId, selectedEdgeId }),
-  setIconPickerOpen: (iconPickerOpen) => set({ iconPickerOpen }),
+  setSidebarTab: (sidebarTab) => set({ sidebarTab }),
   toDocument: () => ({
     version: 1,
     direction: get().direction,
