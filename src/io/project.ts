@@ -2,7 +2,8 @@ import { open, save } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { useStore } from '../flow/store';
 import { generateMermaid } from '../mermaid/generate';
-import { renderMermaid, svgToPng } from '../mermaid/render';
+import { svgToPng } from '../mermaid/render';
+import { buildCanvasSvg } from '../flow/canvasImage';
 import type { ProjectDoc } from '../flow/types';
 
 const S = () => useStore.getState();
@@ -43,9 +44,11 @@ export async function exportMermaid() {
   });
 }
 
+// SVG and PNG export the canvas exactly as arranged (WYSIWYG), built as native
+// SVG (no <foreignObject>, so it's portable and rasterizes without tainting).
+// Mermaid (.mmd) stays the portable, auto-laid-out text representation.
 export async function exportSvg() {
-  const { nodes, edges, direction } = S();
-  const { svg } = await renderMermaid(generateMermaid(nodes, edges, direction));
+  const svg = buildCanvasSvg();
   const path = await save({
     filters: [{ name: 'SVG', extensions: ['svg'] }],
     defaultPath: 'diagram.svg',
@@ -55,9 +58,7 @@ export async function exportSvg() {
 }
 
 export async function exportPng() {
-  const { nodes, edges, direction } = S();
-  const { svg } = await renderMermaid(generateMermaid(nodes, edges, direction));
-  const bytes = await svgToPng(svg);
+  const bytes = await svgToPng(buildCanvasSvg());
   const path = await save({
     filters: [{ name: 'PNG', extensions: ['png'] }],
     defaultPath: 'diagram.png',
