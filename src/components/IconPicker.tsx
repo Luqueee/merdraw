@@ -47,6 +47,15 @@ export function IconPicker() {
     };
   }, [open, query, sourceId, source]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, setOpen]);
+
   if (!open) return null;
 
   const choose = async (icon: IconResult) => {
@@ -65,62 +74,57 @@ export function IconPicker() {
   };
 
   return (
-    <div className="picker-overlay" onClick={() => setOpen(false)}>
-      <div className="picker" onClick={(e) => e.stopPropagation()}>
-        <div className="picker__head">
-          <div className="picker__tabs">
-            {ICON_SOURCES.map((s) => (
-              <button
-                key={s.id}
-                className={`picker__tab${s.id === sourceId ? ' picker__tab--active' : ''}`}
-                onClick={() => setSourceId(s.id)}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-          <div className="picker__searchrow">
-            <input
-              className="input picker__search"
-              placeholder={`Buscar en ${source.label}…`}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              autoFocus
-            />
-            <button className="btn" onClick={() => setOpen(false)}>
-              Cerrar
+    <aside className="picker">
+      <div className="picker__head">
+        <div className="picker__tabs">
+          {ICON_SOURCES.map((s) => (
+            <button
+              key={s.id}
+              className={`picker__tab${s.id === sourceId ? ' picker__tab--active' : ''}`}
+              onClick={() => setSourceId(s.id)}
+            >
+              {s.label}
             </button>
-          </div>
+          ))}
+          <button
+            className="picker__close"
+            onClick={() => setOpen(false)}
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
         </div>
-
-        {error && <div className="picker__error">{error}</div>}
-
-        {loading ? (
-          <p className="picker__msg">Cargando…</p>
-        ) : results.length === 0 ? (
-          <p className="picker__msg">{query ? 'Sin resultados.' : 'Escribe para buscar.'}</p>
-        ) : (
-          <div className="picker__grid">
-            {results.map((icon) => (
-              <button
-                key={icon.id}
-                className="picker__item"
-                title={icon.title}
-                disabled={adding !== null}
-                onClick={() => choose(icon)}
-              >
-                <img
-                  className="picker__icon"
-                  src={icon.previewUrl}
-                  alt={icon.title}
-                  loading="lazy"
-                />
-                <span className="picker__name">{icon.title}</span>
-              </button>
-            ))}
-          </div>
-        )}
+        <input
+          className="input picker__search"
+          placeholder={`Buscar en ${source.label}…`}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          autoFocus
+        />
       </div>
-    </div>
+
+      {error && <div className="picker__error">{error}</div>}
+
+      {loading ? (
+        <p className="picker__msg">Cargando…</p>
+      ) : results.length === 0 ? (
+        <p className="picker__msg">{query ? 'Sin resultados.' : 'Escribe para buscar.'}</p>
+      ) : (
+        <div className="picker__grid">
+          {results.map((icon) => (
+            <button
+              key={icon.id}
+              className="picker__item"
+              title={icon.title}
+              disabled={adding !== null}
+              onClick={() => choose(icon)}
+            >
+              <img className="picker__icon" src={icon.previewUrl} alt={icon.title} loading="lazy" />
+              <span className="picker__name">{icon.title}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </aside>
   );
 }
