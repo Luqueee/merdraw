@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../flow/store';
 import { ICON_SOURCES, iconToDataUri, type IconResult } from '../io/icons';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 
 export function IconPicker() {
   const addIcon = useStore((s) => s.addIcon);
@@ -67,21 +69,18 @@ export function IconPicker() {
   };
 
   return (
-    <div className="picker">
-      <div className="picker__head">
-        <div className="picker__tabs">
-          {ICON_SOURCES.map((s) => (
-            <button
-              key={s.id}
-              className={`picker__tab${s.id === sourceId ? ' picker__tab--active' : ''}`}
-              onClick={() => setSourceId(s.id)}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-        <input
-          className="input picker__search"
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="flex flex-col gap-2.5 border-b p-3.5">
+        <Tabs value={sourceId} onValueChange={(v) => setSourceId(v as string)}>
+          <TabsList>
+            {ICON_SOURCES.map((s) => (
+              <TabsTrigger key={s.id} value={s.id}>
+                {s.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+        <Input
           placeholder={`Buscar en ${source.label}…`}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -89,24 +88,37 @@ export function IconPicker() {
         />
       </div>
 
-      {error && <div className="picker__error">{error}</div>}
+      {error && (
+        <div className="mx-3.5 mt-3 rounded-md border border-destructive/50 bg-destructive/10 px-2.5 py-2 text-xs text-destructive">
+          {error}
+        </div>
+      )}
 
       {loading ? (
-        <p className="picker__msg">Cargando…</p>
+        <p className="p-8 text-center text-muted-foreground">Cargando…</p>
       ) : results.length === 0 ? (
-        <p className="picker__msg">{query ? 'Sin resultados.' : 'Escribe para buscar.'}</p>
+        <p className="p-8 text-center text-muted-foreground">
+          {query ? 'Sin resultados.' : 'Escribe para buscar.'}
+        </p>
       ) : (
-        <div className="picker__grid">
+        <div className="grid min-h-0 flex-1 grid-cols-[repeat(auto-fill,minmax(90px,1fr))] gap-2 overflow-y-auto p-3.5">
           {results.map((icon) => (
             <button
               key={icon.id}
-              className="picker__item"
+              className="flex flex-col items-center gap-1.5 rounded-lg border bg-card p-3 transition-colors hover:border-primary hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
               title={icon.title}
               disabled={adding !== null}
               onClick={() => choose(icon)}
             >
-              <img className="picker__icon" src={icon.previewUrl} alt={icon.title} loading="lazy" />
-              <span className="picker__name">{icon.title}</span>
+              <img
+                className="size-10 object-contain"
+                src={icon.previewUrl}
+                alt={icon.title}
+                loading="lazy"
+              />
+              <span className="max-w-full truncate text-center text-[11px] text-muted-foreground">
+                {icon.title}
+              </span>
             </button>
           ))}
         </div>

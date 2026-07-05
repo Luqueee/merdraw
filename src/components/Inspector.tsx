@@ -1,5 +1,15 @@
 import { useStore } from '../flow/store';
 import type { ShapeKind, LineStyle, FlowEdgeData } from '../flow/types';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const SHAPE_OPTIONS: { value: ShapeKind; label: string }[] = [
   { value: 'rectangle', label: 'Rectángulo' },
@@ -16,6 +26,10 @@ const LINE_OPTIONS: { value: LineStyle; label: string }[] = [
   { value: 'thick', label: 'Gruesa' },
 ];
 
+const sectionClass = 'flex flex-col gap-3 border-b p-4';
+const titleClass =
+  'text-xs font-bold uppercase tracking-wide text-muted-foreground';
+
 export function Inspector() {
   const nodes = useStore((s) => s.nodes);
   const edges = useStore((s) => s.edges);
@@ -29,50 +43,59 @@ export function Inspector() {
 
   if (node && node.type === 'icon') {
     return (
-      <section className="inspector">
-        <h2 className="inspector__title">Icono</h2>
-        <div className="inspector__icon">
-          <img src={node.data.src} alt={node.data.title} />
-          <span>{node.data.title}</span>
+      <section className={sectionClass}>
+        <h2 className={titleClass}>Icono</h2>
+        <div className="flex items-center gap-2.5">
+          <img
+            src={node.data.src}
+            alt={node.data.title}
+            className="size-10 object-contain"
+          />
+          <span className="text-sm font-semibold">{node.data.title}</span>
         </div>
-        <label className="field">
-          <span className="field__label">Etiqueta</span>
-          <input
-            className="input"
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="icon-label">Etiqueta</Label>
+          <Input
+            id="icon-label"
             value={node.data.label}
             onChange={(e) => updateNode(node.id, { label: e.target.value })}
           />
-        </label>
+        </div>
       </section>
     );
   }
 
   if (node) {
     return (
-      <section className="inspector">
-        <h2 className="inspector__title">Nodo</h2>
-        <label className="field">
-          <span className="field__label">Etiqueta</span>
-          <input
-            className="input"
+      <section className={sectionClass}>
+        <h2 className={titleClass}>Nodo</h2>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="node-label">Etiqueta</Label>
+          <Input
+            id="node-label"
             value={node.data.label}
             onChange={(e) => updateNode(node.id, { label: e.target.value })}
           />
-        </label>
-        <label className="field">
-          <span className="field__label">Forma</span>
-          <select
-            className="select"
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label>Forma</Label>
+          <Select
             value={node.data.shape}
-            onChange={(e) => updateNode(node.id, { shape: e.target.value as ShapeKind })}
+            onValueChange={(v) => updateNode(node.id, { shape: v as ShapeKind })}
+            items={SHAPE_OPTIONS}
           >
-            {SHAPE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SHAPE_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </section>
     );
   }
@@ -84,45 +107,50 @@ export function Inspector() {
       arrow: true,
     };
     return (
-      <section className="inspector">
-        <h2 className="inspector__title">Arista</h2>
-        <label className="field">
-          <span className="field__label">Etiqueta</span>
-          <input
-            className="input"
+      <section className={sectionClass}>
+        <h2 className={titleClass}>Arista</h2>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="edge-label">Etiqueta</Label>
+          <Input
+            id="edge-label"
             value={data.label}
             onChange={(e) => updateEdge(edge.id, { label: e.target.value })}
           />
-        </label>
-        <label className="field">
-          <span className="field__label">Estilo de línea</span>
-          <select
-            className="select"
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label>Estilo de línea</Label>
+          <Select
             value={data.lineStyle}
-            onChange={(e) => updateEdge(edge.id, { lineStyle: e.target.value as LineStyle })}
+            onValueChange={(v) => updateEdge(edge.id, { lineStyle: v as LineStyle })}
+            items={LINE_OPTIONS}
           >
-            {LINE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field field--row">
-          <input
-            type="checkbox"
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LINE_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="edge-arrow"
             checked={data.arrow}
-            onChange={(e) => updateEdge(edge.id, { arrow: e.target.checked })}
+            onCheckedChange={(c) => updateEdge(edge.id, { arrow: c === true })}
           />
-          <span className="field__label">Flecha</span>
-        </label>
+          <Label htmlFor="edge-arrow">Flecha</Label>
+        </div>
       </section>
     );
   }
 
   return (
-    <section className="inspector">
-      <p className="inspector__empty">Nada seleccionado</p>
+    <section className={sectionClass}>
+      <p className="text-sm italic text-muted-foreground">Nada seleccionado</p>
     </section>
   );
 }

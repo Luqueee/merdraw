@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../flow/store';
 import { generateMermaid } from '../mermaid/generate';
 import { renderMermaid } from '../mermaid/render';
+import { Button } from '@/components/ui/button';
+
+const titleClass =
+  'text-xs font-bold uppercase tracking-wide text-muted-foreground';
 
 export function MermaidPanel() {
   const nodes = useStore((s) => s.nodes);
@@ -53,26 +57,35 @@ export function MermaidPanel() {
   };
 
   return (
-    <section className="panel">
-      <div className="panel__section">
-        <h2 className="panel__title">Vista previa</h2>
+    <section className="flex min-h-0 flex-1 flex-col">
+      <div className="border-b p-4">
+        <h2 className={`mb-2 ${titleClass}`}>Vista previa</h2>
         {empty ? (
-          <p className="panel__empty">Añade nodos para ver el diagrama.</p>
+          <p className="text-sm italic text-muted-foreground">
+            Añade nodos para ver el diagrama.
+          </p>
         ) : error ? (
-          <div className="panel__error">{error}</div>
+          <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2.5 font-mono text-xs whitespace-pre-wrap text-destructive">
+            {error}
+          </div>
         ) : (
-          <div className="panel__preview" dangerouslySetInnerHTML={{ __html: svg }} />
+          <div
+            className="flex justify-center overflow-auto rounded-md border bg-muted/40 p-2 [&_svg]:h-auto [&_svg]:max-w-full"
+            dangerouslySetInnerHTML={{ __html: svg }}
+          />
         )}
       </div>
 
-      <div className="panel__section">
-        <div className="panel__header">
-          <h2 className="panel__title">Mermaid</h2>
-          <button className="btn btn--sm" onClick={copy}>
+      <div className="p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className={titleClass}>Mermaid</h2>
+          <Button variant="outline" size="xs" onClick={copy}>
             {copied ? 'Copiado' : 'Copiar'}
-          </button>
+          </Button>
         </div>
-        <pre className="panel__code">{code}</pre>
+        <pre className="overflow-x-auto rounded-md bg-neutral-900 p-3 font-mono text-xs whitespace-pre text-neutral-100">
+          {code}
+        </pre>
       </div>
     </section>
   );

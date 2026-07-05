@@ -7,6 +7,15 @@ import {
   exportSvg,
   exportPng,
 } from '../io/project';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 
 const SHAPES: { kind: ShapeKind; label: string }[] = [
   { kind: 'rectangle', label: 'Rectángulo' },
@@ -19,6 +28,9 @@ const SHAPES: { kind: ShapeKind; label: string }[] = [
 
 const DIRECTIONS: Direction[] = ['TD', 'LR', 'BT', 'RL'];
 
+const groupLabel =
+  'text-xs font-semibold uppercase tracking-wide text-muted-foreground';
+
 export function Toolbar() {
   const addNode = useStore((s) => s.addNode);
   const direction = useStore((s) => s.direction);
@@ -27,59 +39,67 @@ export function Toolbar() {
   const setSidebarTab = useStore((s) => s.setSidebarTab);
 
   return (
-    <header className="toolbar">
-      <div className="toolbar__group">
-        <span className="toolbar__label">Añadir</span>
+    <header className="flex flex-wrap items-center gap-3 border-b bg-background px-3 py-2">
+      <div className="flex items-center gap-1.5">
+        <span className={`mr-1 ${groupLabel}`}>Añadir</span>
         {SHAPES.map(({ kind, label }) => (
-          <button key={kind} className="btn" onClick={() => addNode(kind)}>
+          <Button
+            key={kind}
+            variant="outline"
+            size="sm"
+            onClick={() => addNode(kind)}
+          >
             {label}
-          </button>
+          </Button>
         ))}
-        <button className="btn" onClick={() => setSidebarTab('icons')}>
+        <Button variant="outline" size="sm" onClick={() => setSidebarTab('icons')}>
           Icono
-        </button>
+        </Button>
       </div>
 
-      <div className="toolbar__group">
-        <label className="toolbar__label" htmlFor="direction">
-          Dirección
-        </label>
-        <select
-          id="direction"
-          className="select"
+      <Separator orientation="vertical" className="h-6" />
+
+      <div className="flex items-center gap-1.5">
+        <span className={groupLabel}>Dirección</span>
+        <Select
           value={direction}
-          onChange={(e) => setDirection(e.target.value as Direction)}
+          onValueChange={(v) => setDirection(v as Direction)}
         >
-          {DIRECTIONS.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger size="sm" className="w-[74px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {DIRECTIONS.map((d) => (
+              <SelectItem key={d} value={d}>
+                {d}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="toolbar__group">
-        <button className="btn" onClick={loadSample}>
-          Ejemplo
-        </button>
-      </div>
+      <Separator orientation="vertical" className="h-6" />
 
-      <div className="toolbar__group toolbar__group--right">
-        <button className="btn btn--primary" onClick={saveProject}>
+      <Button variant="outline" size="sm" onClick={loadSample}>
+        Ejemplo
+      </Button>
+
+      <div className="ml-auto flex items-center gap-1.5">
+        <Button size="sm" onClick={saveProject}>
           Guardar
-        </button>
-        <button className="btn" onClick={openProject}>
+        </Button>
+        <Button variant="outline" size="sm" onClick={openProject}>
           Abrir
-        </button>
-        <button className="btn" onClick={exportMermaid}>
+        </Button>
+        <Button variant="outline" size="sm" onClick={exportMermaid}>
           .mmd
-        </button>
-        <button className="btn" onClick={exportSvg}>
+        </Button>
+        <Button variant="outline" size="sm" onClick={exportSvg}>
           SVG
-        </button>
-        <button className="btn" onClick={exportPng}>
+        </Button>
+        <Button variant="outline" size="sm" onClick={exportPng}>
           PNG
-        </button>
+        </Button>
       </div>
     </header>
   );

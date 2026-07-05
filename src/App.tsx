@@ -7,11 +7,11 @@ import './index.css';
 
 export default function App() {
   return (
-    <div className="app">
+    <div className="flex h-screen flex-col overflow-hidden">
       <Toolbar />
-      <div className="app__body">
+      <div className="flex min-h-0 flex-1">
         <ReactFlowProvider>
-          <div className="canvas">
+          <div className="h-full min-w-0 flex-1">
             <FlowCanvas />
           </div>
         </ReactFlowProvider>
