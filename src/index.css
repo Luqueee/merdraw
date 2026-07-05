@@ -323,10 +323,17 @@ body {
 }
 
 .icon-node__img {
+  display: block;
   width: 48px;
   height: 48px;
   object-fit: contain;
   pointer-events: none;
+}
+
+.icon-node__img svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .icon-node__label {
