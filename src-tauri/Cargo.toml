@@ -25,3 +25,12 @@ serde_json = "1"
 tauri-plugin-dialog = "2"
 ureq = "2"
 
+# MCP server: embed rmcp with Streamable HTTP transport to expose the live
+# diagram to AI clients. schemars is a direct dep (rmcp does not re-export it)
+# pinned to rmcp 0.16's "1.0" so the derived JsonSchema satisfies rmcp's bound.
+rmcp = { version = "0.16.0", features = ["server", "macros", "schemars", "transport-streamable-http-server"] }
+axum = "0.8"
+tokio = { version = "1", features = ["sync", "time", "rt", "net", "macros"] }
+uuid = { version = "1", features = ["v4"] }
+schemars = { version = "1", features = ["derive"] }
+

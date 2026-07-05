@@ -23,9 +23,9 @@ import type {
 export type SidebarTab = 'diagram' | 'icons';
 
 let seq = 0;
-const nextId = () => `node_${Date.now()}_${seq++}`;
+export const nextId = (prefix = 'node') => `${prefix}_${Date.now()}_${seq++}`;
 
-function edgeVisuals(data: FlowEdgeData) {
+export function edgeVisuals(data: FlowEdgeData) {
   const style =
     data.lineStyle === 'dotted'
       ? { strokeDasharray: '6 4' }
