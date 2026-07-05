@@ -21,8 +21,8 @@ export default function App() {
           <Inspector />
           <MermaidPanel />
         </aside>
+        <IconPicker />
       </div>
-      <IconPicker />
     </div>
   );
 }
